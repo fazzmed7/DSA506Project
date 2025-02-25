@@ -8,8 +8,8 @@ from sklearn.cluster import KMeans
 from sklearn.metrics import mean_squared_error, r2_score
 
 # Load Dataset
-url = "https://raw.githubusercontent.com/selva86/datasets/master/Superstore.csv"
-df = pd.read_csv(url, encoding='latin-1')
+
+df = pd.read_csv('/workspaces/DSA506Project/SampleSuperstore.csv', encoding='windows-1254')
 
 # Data Cleaning
 df.drop_duplicates(inplace=True)
@@ -24,12 +24,14 @@ plt.title("Total Sales by Category")
 plt.xlabel("Category")
 plt.ylabel("Sales")
 plt.show()
+plt.savefig('plot1.png')
 
 # Correlation Heatmap
 plt.figure(figsize=(8, 6))
 sns.heatmap(df[['Sales', 'Profit', 'Quantity', 'Discount']].corr(), annot=True, cmap='coolwarm')
 plt.title("Feature Correlation Heatmap")
 plt.show()
+plt.savefig('plot2.png')
 
 # Regression Model (Predicting Sales based on Discount & Quantity)
 X = df[['Discount', 'Quantity']]
@@ -52,6 +54,7 @@ plt.xlabel("Actual Sales")
 plt.ylabel("Predicted Sales")
 plt.title("Actual vs Predicted Sales")
 plt.show()
+plt.savefig('plot3.png')
 
 # Clustering (Customer Segmentation based on Sales & Profit)
 kmeans = KMeans(n_clusters=3, random_state=42)
@@ -63,6 +66,7 @@ plt.title("Customer Segmentation Based on Sales & Profit")
 plt.xlabel("Sales")
 plt.ylabel("Profit")
 plt.show()
+plt.savefig('plot4.png')
 
 # Storytelling and Insights
 print("### Storytelling: Superstore Sales Analysis")
