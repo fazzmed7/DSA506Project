@@ -1,0 +1,10 @@
+pandas
+numpy
+matplotlib
+seaborn 
+train_test_split
+LinearRegression
+KMeans
+mean_squared_error
+r2_score
+streamlit
