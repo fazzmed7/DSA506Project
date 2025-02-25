@@ -64,8 +64,19 @@ plt.xlabel("Sales")
 plt.ylabel("Profit")
 plt.show()
 
-# Key Insights
-print("1. The Technology category generates the highest sales.")
-print("2. Discounts have a weak correlation with Sales, suggesting excessive discounts may not significantly boost revenue.")
-print("3. The regression model has moderate accuracy, indicating additional features may improve predictions.")
-print("4. Clustering reveals three customer segments, which can help tailor marketing strategies.")
+# Storytelling and Insights
+print("### Storytelling: Superstore Sales Analysis")
+print("Superstore is looking to optimize its sales strategy by analyzing historical sales data. This project aims to provide insights into sales trends, profitability, and customer behavior using data analytics.")
+
+print("**Key Insights:**")
+print("1. The Technology category generates the highest sales, making it a priority for marketing efforts.")
+print("2. The correlation heatmap shows that discounts have a weak correlation with sales, suggesting that excessive discounts may not significantly boost revenue.")
+print("3. Regression analysis predicts sales based on discount and quantity, showing moderate accuracy. Additional factors like customer demographics could improve predictions.")
+print("4. Clustering analysis reveals three customer segments based on sales and profit, allowing for targeted marketing strategies.")
+
+print("### Business Recommendations:")
+print("- Focus on promoting high-profit categories like Technology while optimizing discounts for better margins.")
+print("- Use customer segmentation insights to create personalized marketing campaigns.")
+print("- Improve the predictive model by incorporating more features like regional trends and customer loyalty data.")
+
+print("This analysis provides a data-driven foundation for decision-making, ensuring Superstore remains competitive and profitable.")
