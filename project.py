@@ -11,11 +11,13 @@ from sklearn.metrics import mean_squared_error, r2_score
 
 df = pd.read_csv('/workspaces/DSA506Project/SampleSuperstore.csv', encoding='windows-1254')
 
-# Data Cleaning
+# Data Cleaning and transfroming
 df.drop_duplicates(inplace=True)
 df.dropna(inplace=True)
 df['Order Date'] = pd.to_datetime(df['Order Date'])
 df['Ship Date'] = pd.to_datetime(df['Ship Date'])
+df['Lead time'] = (df['Ship Date']-df['Order Date']).dt.days
+df['year_month'] = df['Order Date'].dt.strftime('%Y-%m')
 
 # Exploratory Data Analysis (EDA)
 plt.figure(figsize=(10, 5))
