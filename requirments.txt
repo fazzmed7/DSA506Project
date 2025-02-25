@@ -1,6 +1,7 @@
 pandas
 numpy
 matplotlib
+pyplot
 seaborn 
 train_test_split
 LinearRegression
@@ -8,3 +9,4 @@ KMeans
 mean_squared_error
 r2_score
 streamlit
+scikit-learn
