@@ -84,7 +84,7 @@ sales_map.save("sales_map.html")
 plt.figure(figsize=(8, 6))
 sns.heatmap(df[['Sales', 'Profit', 'Quantity', 'Discount']].corr(), annot=True, cmap='coolwarm')
 plt.title("Feature Correlation Heatmap")
-plt.savefig("plot6.jpg", dpi=300)
+plt.savefig("plot5.jpg", dpi=300)
 plt.show()
 
 # Regression Model (Predicting Sales based on Discount & Quantity)
@@ -107,7 +107,7 @@ plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], '--', color
 plt.xlabel("Actual Sales")
 plt.ylabel("Predicted Sales")
 plt.title("Actual vs Predicted Sales")
-plt.savefig("plot7.jpg", dpi=300)
+plt.savefig("plot6.jpg", dpi=300)
 plt.show()
 
 # Clustering (Customer Segmentation based on Sales & Profit)
@@ -119,7 +119,7 @@ sns.scatterplot(x=df['Sales'], y=df['Profit'], hue=df['Cluster'], palette='virid
 plt.title("Customer Segmentation Based on Sales & Profit")
 plt.xlabel("Sales")
 plt.ylabel("Profit")
-plt.savefig("plot8.jpg", dpi=300)
+plt.savefig("plot7.jpg", dpi=300)
 plt.show()
 
 # Storytelling and Insights
