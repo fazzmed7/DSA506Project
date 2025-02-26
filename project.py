@@ -26,25 +26,6 @@ df['year_month'] = df['Order Date'].dt.strftime('%Y-%m')
 df['Year'] = df['Order Date'].dt.year
 df['Month'] = df['Order Date'].dt.month
 df['Day'] = df['Order Date'].dt.day
-# Load Dataset
-
-df = pd.read_csv('/content/Sample - Superstore.csv', encoding='windows-1254')
-
-# Drop rows with missing value
-print(df.isnull().sum())
-df.dropna(inplace=True)
-#Remove duplicates  
-df.drop_duplicates(inplace=True)
-df.dropna(inplace=True)
-#Transform data types
-df['Order Date'] = pd.to_datetime(df['Order Date'])
-df['Ship Date'] = pd.to_datetime(df['Ship Date'])
-df['Lead time'] = (df['Ship Date']-df['Order Date']).dt.days
-df['year_month'] = df['Order Date'].dt.strftime('%Y-%m')
-#Add derived columns
-df['Year'] = df['Order Date'].dt.year
-df['Month'] = df['Order Date'].dt.month
-df['Day'] = df['Order Date'].dt.day
 
 # Exploratory Data Analysis (EDA)
 #Total Sales and Profits across regions
