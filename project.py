@@ -91,17 +91,22 @@ state_sales = df.groupby('State', as_index=False)['Sales'].sum()
 state_sales['Latitude'] = state_sales['State'].map(lambda x: state_coordinates.get(x, [None, None])[0])
 state_sales['Longitude'] = state_sales['State'].map(lambda x: state_coordinates.get(x, [None, None])[1])
 
-# Generate Interactive Map
-def generate_map(df):
+# Aggregate Sales and Profit by State
+state_sales_profit = df.groupby('State').agg({'Sales': 'sum', 'Profit': 'sum'}).reset_index()
+
+# Generate Interactive Map with State Coordinates and Sales/Profit Info
+def generate_map(df, state_sales_profit):
     store_map = folium.Map(location=[39.8283, -98.5795], zoom_start=4)
-    marker_cluster = MarkerCluster().add_to(store_map)
-    for _, row in df.iterrows():
-        if pd.notna(row['Latitude']) and pd.notna(row['Longitude']):
+    for _, row in state_sales_profit.iterrows():
+        state = row['State']
+        coords = state_coordinates.get(state, [None, None])
+        if coords[0] is not None and coords[1] is not None:
+            popup_text = f"State: {state}<br>Sales: ${row['Sales']:,.2f}<br>Profit: ${row['Profit']:,.2f}"
             folium.Marker(
-                location=[row['Latitude'], row['Longitude']],
-                popup=f"State: {row['State']}\nSales: ${row['Sales']:,.2f}",
+                location=coords,
+                popup=popup_text,
                 icon=folium.Icon(color='blue')
-            ).add_to(marker_cluster)
+            ).add_to(store_map)
     return store_map
 
 sales_map = generate_map(state_sales)
