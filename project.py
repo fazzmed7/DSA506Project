@@ -20,6 +20,17 @@ df['Order Date'] = pd.to_datetime(df['Order Date'])
 df['Ship Date'] = pd.to_datetime(df['Ship Date'])
 
 # Exploratory Data Analysis (EDA)
+#Total Sales and Profits across regions
+#Group data by region and calculate total sales 
+regional_sales=df.groupby('Region')['Sales'].sum().reset_index()
+#Create an interactive bar plot
+fig=px.bar(regional_sales,x='Region',y='Sales',title='Total Sales by Region',
+           labels={'Sales':'Total Sales','Region':'Region'},
+           color='Region',text='Sales')
+fig.update_traces(textposition='outside')
+fig.write_image("plot0.png")
+fig.show()
+
 # Understanding sales distribution across different product categories.
 plt.figure(figsize=(10, 5))
 df.groupby('Category')['Sales'].sum().plot(kind='bar', color='skyblue')
