@@ -9,6 +9,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.cluster import KMeans
 from sklearn.metrics import mean_squared_error, r2_score
+from statsmodels.tsa.statespace.sarimax import SARIMAX
 
 # Load Dataset
 df = pd.read_csv('/content/Sample - Superstore.csv', encoding='windows-1254')
@@ -166,6 +167,42 @@ plt.xlabel("Sales")
 plt.ylabel("Profit")
 plt.savefig("plot7.jpg", dpi=300)
 plt.show()
+
+# Model Performance Evaluation
+X = df[['Sales']]
+y = df['Profit']
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Linear Regression
+lr = LinearRegression()
+lr.fit(X_train, y_train)
+y_pred_lr = lr.predict(X_test)
+lr_accuracy = r2_score(y_test, y_pred_lr)
+
+# Time Series SARIMA Model
+ts_model = SARIMAX(df['Profit'], order=(1,1,1), seasonal_order=(1,1,1,12))
+ts_result = ts_model.fit()
+y_pred_sarima = ts_result.predict(start=len(y_train), end=len(y_train) + len(y_test) - 1)
+ts_accuracy = r2_score(y_test, y_pred_sarima)
+
+# KMeans Clustering
+kmeans = KMeans(n_clusters=3, random_state=42)
+kmeans.fit(X)
+kmeans_accuracy = 1 - kmeans.inertia_ / np.var(X)
+
+# Model Performance Summary Graph
+models = ['Linear Regression', 'SARIMA (Time Series)', 'KMeans Clustering']
+accuracies = [lr_accuracy, ts_accuracy, kmeans_accuracy]
+
+plt.figure(figsize=(8,5))
+plt.bar(models, accuracies, color=['blue', 'green', 'red'])
+plt.xlabel("Model")
+plt.ylabel("Accuracy Score")
+plt.title("Comparison of Model Performance")
+plt.ylim(0, 1)
+plt.savefig("plot8.jpg", dpi=300)
+plt.show()
+
 
 # Storytelling and Insights
 print("### Storytelling: Superstore Sales Analysis")
