@@ -2,87 +2,147 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+import plotly.express as px
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.cluster import KMeans
 from sklearn.metrics import mean_squared_error, r2_score
-
 # Load Dataset
 
-df = pd.read_csv('/workspaces/DSA506Project/SampleSuperstore.csv', encoding='windows-1254')
+df = pd.read_csv('/content/Sample - Superstore.csv', encoding='windows-1254')
 
-# Data Cleaning and transfroming
+# Drop rows with missing value
+print(df.isnull().sum())
+df.dropna(inplace=True)
+#Remove duplicates  
 df.drop_duplicates(inplace=True)
 df.dropna(inplace=True)
+#Transform data types
 df['Order Date'] = pd.to_datetime(df['Order Date'])
 df['Ship Date'] = pd.to_datetime(df['Ship Date'])
 df['Lead time'] = (df['Ship Date']-df['Order Date']).dt.days
 df['year_month'] = df['Order Date'].dt.strftime('%Y-%m')
+#Add derived columns
+df['Year'] = df['Order Date'].dt.year
+df['Month'] = df['Order Date'].dt.month
+df['Day'] = df['Order Date'].dt.day
+# Load Dataset
+
+df = pd.read_csv('/content/Sample - Superstore.csv', encoding='windows-1254')
+
+# Drop rows with missing value
+print(df.isnull().sum())
+df.dropna(inplace=True)
+#Remove duplicates  
+df.drop_duplicates(inplace=True)
+df.dropna(inplace=True)
+#Transform data types
+df['Order Date'] = pd.to_datetime(df['Order Date'])
+df['Ship Date'] = pd.to_datetime(df['Ship Date'])
+df['Lead time'] = (df['Ship Date']-df['Order Date']).dt.days
+df['year_month'] = df['Order Date'].dt.strftime('%Y-%m')
+#Add derived columns
+df['Year'] = df['Order Date'].dt.year
+df['Month'] = df['Order Date'].dt.month
+df['Day'] = df['Order Date'].dt.day
 
 # Exploratory Data Analysis (EDA)
-plt.figure(figsize=(10, 5))
-df.groupby('Category')['Sales'].sum().plot(kind='bar', color='skyblue')
-plt.title("Total Sales by Category")
-plt.xlabel("Category")
-plt.ylabel("Sales")
+#Total Sales and Profits across regions
+#Group data by region and calculate total sales 
+regional_sales=df.groupby('Region')['Sales'].sum().reset_index()
+#Create an interactive bar plot
+fig=px.bar(regional_sales,x='Region',y='Sales',title='Total Sales by Region',
+           labels={'Sales':'Total Sales','Region':'Region'},
+           color='Region',text='Sales')
+fig.update_traces(textposition='outside')
+fig.show()
+#Sales and Profits by Product category & subcategory
+category_analysis = df.groupby(['Category', 'Sub-Category']).agg({'Sales': 'sum', 'Profit': 'sum'}).reset_index()
+category_analysis = df.groupby(['Category', 'Sub-Category']).agg({'Sales': 'sum', 'Profit': 'sum'}).reset_index()
+#total sales by category
+sales_by_category = df.groupby('Category')['Sales'].sum().reset_index()
+print(sales_by_category)
+#total profit by category
+profit_by_category = df.groupby('Category')['Profit'].sum().reset_index()
+print(profit_by_category)
+#sales by category
+plt.figure(figsize=(10, 6))
+sns.barplot(x='Category', y='Sales', data=sales_by_category, palette='viridis')
+plt.title('Total Sales by Category')
 plt.show()
-plt.savefig('plot1.png')
-
-# Correlation Heatmap
-plt.figure(figsize=(8, 6))
-sns.heatmap(df[['Sales', 'Profit', 'Quantity', 'Discount']].corr(), annot=True, cmap='coolwarm')
-plt.title("Feature Correlation Heatmap")
+#Profit by category
+plt.figure(figsize=(10, 6))
+sns.barplot(x='Category', y='Profit', data=profit_by_category, palette='viridis')
+plt.title('Total Profit by Category')
 plt.show()
-plt.savefig('plot2.png')
-
-# Regression Model (Predicting Sales based on Discount & Quantity)
-X = df[['Discount', 'Quantity']]
-y = df['Sales']
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-model = LinearRegression()
-model.fit(X_train, y_train)
-y_pred = model.predict(X_test)
-
-# Model Evaluation
-print(f'RMSE: {np.sqrt(mean_squared_error(y_test, y_pred))}')
-print(f'R² Score: {r2_score(y_test, y_pred)}')
-
-# Scatter Plot of Actual vs Predicted Sales
-plt.figure(figsize=(8, 6))
-plt.scatter(y_test, y_pred, alpha=0.5, color='blue')
-plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], '--', color='red')
-plt.xlabel("Actual Sales")
-plt.ylabel("Predicted Sales")
-plt.title("Actual vs Predicted Sales")
+#total sales by subcategory
+sales_by_subcategory = df.groupby('Sub-Category')['Sales'].sum().reset_index()
+print(sales_by_subcategory)
+#total profit by subcategory
+profit_by_subcategory = df.groupby('Sub-Category')['Profit'].sum().reset_index()
+print(profit_by_subcategory)
+#sales by subcategory
+plt.figure(figsize=(12, 6))
+sns.barplot(x='Sub-Category', y='Sales', data=sales_by_subcategory, palette='viridis')
+plt.title('Total Sales by Subcategory')
+plt.xticks(rotation=45)
 plt.show()
-plt.savefig('plot3.png')
-
-# Clustering (Customer Segmentation based on Sales & Profit)
-kmeans = KMeans(n_clusters=3, random_state=42)
-df['Cluster'] = kmeans.fit_predict(df[['Sales', 'Profit']])
-
-plt.figure(figsize=(8, 6))
-sns.scatterplot(x=df['Sales'], y=df['Profit'], hue=df['Cluster'], palette='viridis')
-plt.title("Customer Segmentation Based on Sales & Profit")
-plt.xlabel("Sales")
-plt.ylabel("Profit")
+#profit by subcategory
+plt.figure(figsize=(12, 6))
+sns.barplot(x='Sub-Category', y='Profit', data=profit_by_subcategory, palette='viridis')
+plt.title('Total Profit by Subcategory')
+plt.xticks(rotation=45)
 plt.show()
-plt.savefig('plot4.png')
+fig = px.bar(category_analysis, x='Category', y='Sales', color='Sub-Category', 
+             title='Sales by Category and Subcategory')
+fig.show()
+#Trends over time
+#Month & Order from column
+df['Order Date'] = pd.to_datetime(df['Order Date'])
+df['Month'] = df['Order Date'].dt.strftime('%Y-%m')
+#Monthly sales by category
+monthly_category_sales = df.groupby(['Month', 'Category'])['Sales'].sum().reset_index()
+plt.figure(figsize=(12, 6))
+for category in monthly_category_sales['Category'].unique():
+    data = monthly_category_sales[monthly_category_sales['Category'] == category]
+    plt.plot(data['Month'], data['Sales'], label=category)
+plt.title('Monthly Sales Trends by Category')
+plt.xlabel('Month')
+plt.ylabel('Total Sales')
+plt.xticks(rotation=45)
+plt.legend()
+plt.show()
+sns.scatterplot(x='Sales', y='Profit', hue='Category', data=df)
+plt.title('Sales vs. Profit by Category')
+plt.show()
+# Group data by category and calculate average sales, profit, and discount
+category_metrics = df.groupby('Category').agg({'Sales': 'mean', 'Profit': 'mean', 'Discount': 'mean'}).reset_index()
 
-# Storytelling and Insights
-print("### Storytelling: Superstore Sales Analysis")
-print("Superstore is looking to optimize its sales strategy by analyzing historical sales data. This project aims to provide insights into sales trends, profitability, and customer behavior using data analytics.")
-
-print("**Key Insights:**")
-print("1. The Technology category generates the highest sales, making it a priority for marketing efforts.")
-print("2. The correlation heatmap shows that discounts have a weak correlation with sales, suggesting that excessive discounts may not significantly boost revenue.")
-print("3. Regression analysis predicts sales based on discount and quantity, showing moderate accuracy. Additional factors like customer demographics could improve predictions.")
-print("4. Clustering analysis reveals three customer segments based on sales and profit, allowing for targeted marketing strategies.")
-
-print("### Business Recommendations:")
-print("- Focus on promoting high-profit categories like Technology while optimizing discounts for better margins.")
-print("- Use customer segmentation insights to create personalized marketing campaigns.")
-print("- Improve the predictive model by incorporating more features like regional trends and customer loyalty data.")
-
-print("This analysis provides a data-driven foundation for decision-making, ensuring Superstore remains competitive and profitable.")
+# Heatmap
+plt.figure(figsize=(10, 6))
+sns.heatmap(category_metrics.set_index('Category'), annot=True, cmap='coolwarm')
+plt.title('Average Sales, Profit, and Discount by Category')
+plt.show()
+#Trends & Patterns over time
+df['Year'] = df['Order Date'].dt.year
+df['Month'] = df['Order Date'].dt.month
+df['Day'] = df['Order Date'].dt.day
+#Group by month & calculate total sales & profit
+df['YearMonth'] = df['Order Date'].dt.strftime('%Y-%m')
+monthly_data = df.groupby('YearMonth').agg({'Sales': 'sum', 'Profit': 'sum'}).reset_index()
+plt.figure(figsize=(12, 6))
+plt.plot(monthly_data['YearMonth'], monthly_data['Sales'], marker='o')
+plt.title('Monthly Sales Trends')
+plt.xlabel('Month')
+plt.ylabel('Total Sales')
+plt.xticks(rotation=45)
+plt.grid()
+plt.show()
+plt.figure(figsize=(12, 6))
+plt.plot(monthly_data['YearMonth'], monthly_data['Profit'], marker='o', color='orange')
+plt.title('Monthly Profit Trends')
+plt.xlabel('Month')
+plt.ylabel('Total Profit')
+plt.xticks(rotation=45)
+plt.grid()
+plt.show()
