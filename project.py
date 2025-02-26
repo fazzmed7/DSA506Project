@@ -11,8 +11,7 @@ from sklearn.cluster import KMeans
 from sklearn.metrics import mean_squared_error, r2_score
 
 # Load Dataset
-url = "https://raw.githubusercontent.com/selva86/datasets/master/Superstore.csv"
-df = pd.read_csv(url, encoding='latin-1')
+df = pd.read_csv('/content/Sample - Superstore.csv', encoding='windows-1254')
 
 # Data Cleaning
 df.drop_duplicates(inplace=True)
