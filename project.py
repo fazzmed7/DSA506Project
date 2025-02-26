@@ -102,14 +102,15 @@ def generate_map(df, state_sales_profit):
         coords = state_coordinates.get(state, [None, None])
         if coords[0] is not None and coords[1] is not None:
             popup_text = f"State: {state}<br>Sales: ${row['Sales']:,.2f}<br>Profit: ${row['Profit']:,.2f}"
+            marker_color = 'green' if row['Profit'] > 0 else 'yellow'
             folium.Marker(
                 location=coords,
                 popup=popup_text,
-                icon=folium.Icon(color='blue')
+                icon=folium.Icon(color=marker_color)
             ).add_to(store_map)
     return store_map
 
-sales_map = generate_map(state_sales)
+sales_map = generate_map(df, state_sales_profit)
 sales_map.save("sales_map.html")
 
 
