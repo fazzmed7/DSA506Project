@@ -20,6 +20,7 @@ df['Order Date'] = pd.to_datetime(df['Order Date'])
 df['Ship Date'] = pd.to_datetime(df['Ship Date'])
 
 # Exploratory Data Analysis (EDA)
+# Understanding sales distribution across different product categories.
 plt.figure(figsize=(10, 5))
 df.groupby('Category')['Sales'].sum().plot(kind='bar', color='skyblue')
 plt.title("Total Sales by Category")
@@ -29,6 +30,7 @@ plt.savefig("plot1.jpg", dpi=300)
 plt.show()
 
 # Sales Across Different Locations
+# Identifying which states generate the most revenue.
 plt.figure(figsize=(12, 6))
 df.groupby('State')['Sales'].sum().sort_values(ascending=False).plot(kind='bar', color='teal')
 plt.title("Total Sales by State")
@@ -38,7 +40,18 @@ plt.xticks(rotation=90)
 plt.savefig("plot2.jpg", dpi=300)
 plt.show()
 
+# Display List of States Contributing to Sales
+state_sales_list = df.groupby('State')['Sales'].sum().reset_index()
+print("List of States Contributing to Sales:")
+print(state_sales_list)
+
+# Display Unique Categorical Values of States
+unique_states = df['State'].unique()
+print("Unique States:", unique_states)
+
+
 # Profit Across Different Locations
+# Analyzing profitability distribution by state to identify key revenue-driving locations.
 plt.figure(figsize=(12, 6))
 df.groupby('State')['Profit'].sum().sort_values(ascending=False).plot(kind='bar', color='green')
 plt.title("Total Profit by State")
@@ -49,36 +62,51 @@ plt.savefig("plot3.jpg", dpi=300)
 plt.show()
 
 # Total Profit Calculation
+# Summing up the total profit to gauge overall business performance.
 total_profit = df['Profit'].sum()
 print(f"Total Profit: ${total_profit:,.2f}")
 
-# Total Profit Visualization
-plt.figure(figsize=(6, 4))
-plt.bar(['Total Profit'], [total_profit], color='purple')
-plt.title("Total Profit of Superstore")
-plt.ylabel("Profit ($)")
-plt.savefig("plot4.jpg", dpi=300)
-plt.show()
+# Approximate Latitude and Longitude for US States
+state_coordinates = {
+    "Alabama": [32.806671, -86.791130], "Arizona": [33.729759, -111.431221], "Arkansas": [34.969704, -92.373123],
+    "California": [36.116203, -119.681564], "Colorado": [39.059811, -105.311104], "Connecticut": [41.597782, -72.755371],
+    "Delaware": [39.318523, -75.507141], "Florida": [27.766279, -81.686783], "Georgia": [33.040619, -83.643074],
+    "Idaho": [44.240459, -114.478828], "Illinois": [40.349457, -88.986137], "Indiana": [39.849426, -86.258278],
+    "Iowa": [42.011539, -93.210526], "Kansas": [38.526600, -96.726486], "Kentucky": [37.668140, -84.670067],
+    "Louisiana": [31.169546, -91.867805], "Maine": [44.693947, -69.381927], "Maryland": [39.063946, -76.802101],
+    "Massachusetts": [42.230171, -71.530106], "Michigan": [43.326618, -84.536095], "Minnesota": [45.694454, -93.900192],
+    "Mississippi": [32.741646, -89.678696], "Missouri": [38.456085, -92.288368], "Montana": [46.921925, -110.454353],
+    "Nebraska": [41.125370, -98.268082], "Nevada": [38.313515, -117.055374], "New Hampshire": [43.452492, -71.563896],
+    "New Jersey": [40.298904, -74.521011], "New Mexico": [34.840515, -106.248482], "New York": [42.165726, -74.948051],
+    "North Carolina": [35.630066, -79.806419], "North Dakota": [47.528912, -99.784012], "Ohio": [40.388783, -82.764915],
+    "Oklahoma": [35.565342, -96.928917], "Oregon": [44.572021, -122.070938], "Pennsylvania": [40.590752, -77.209755],
+    "Rhode Island": [41.680893, -71.511780], "South Carolina": [33.856892, -80.945007], "South Dakota": [44.299782, -99.438828],
+    "Tennessee": [35.747845, -86.692345], "Texas": [31.054487, -97.563461], "Utah": [40.150032, -111.862434],
+    "Vermont": [44.045876, -72.710686], "Virginia": [37.769337, -78.169968], "Washington": [47.400902, -121.490494],
+    "West Virginia": [38.491226, -80.954456], "Wisconsin": [44.268543, -89.616508], "Wyoming": [42.755966, -107.302490]
+}
 
-# Interactive Map using Folium
+# Add Coordinates to DataFrame
+state_sales = df.groupby('State', as_index=False)['Sales'].sum()
+state_sales['Latitude'] = state_sales['State'].map(lambda x: state_coordinates.get(x, [None, None])[0])
+state_sales['Longitude'] = state_sales['State'].map(lambda x: state_coordinates.get(x, [None, None])[1])
+
+# Generate Interactive Map
 def generate_map(df):
     store_map = folium.Map(location=[39.8283, -98.5795], zoom_start=4)
     marker_cluster = MarkerCluster().add_to(store_map)
     for _, row in df.iterrows():
-        folium.Marker(
-            location=[row['Latitude'], row['Longitude']],
-            popup=f"State: {row['State']}\nSales: ${row['Sales']:,.2f}",
-            icon=folium.Icon(color='blue')
-        ).add_to(marker_cluster)
+        if pd.notna(row['Latitude']) and pd.notna(row['Longitude']):
+            folium.Marker(
+                location=[row['Latitude'], row['Longitude']],
+                popup=f"State: {row['State']}\nSales: ${row['Sales']:,.2f}",
+                icon=folium.Icon(color='blue')
+            ).add_to(marker_cluster)
     return store_map
-
-# Dummy Coordinates (for visualization, replace with actual lat/lon data if available)
-state_sales = df.groupby('State', as_index=False)['Sales'].sum()
-state_sales['Latitude'] = np.random.uniform(25, 50, state_sales.shape[0])
-state_sales['Longitude'] = np.random.uniform(-125, -67, state_sales.shape[0])
 
 sales_map = generate_map(state_sales)
 sales_map.save("sales_map.html")
+
 
 # Correlation Heatmap
 plt.figure(figsize=(8, 6))
