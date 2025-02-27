@@ -10,3 +10,5 @@ r2_score
 streamlit
 folium
 SARIMAX
+silhouette_score 
+mean_absolute_percentage_error
