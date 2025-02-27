@@ -1,3 +1,12 @@
+!pip install -U kaleido
+import kaleido
+import plotly
+print(f"Plotly version: {plotly.__version__}")
+print(f"Kaleido version: {kaleido.__version__}")
+import IPython
+app = IPython.Application.instance()
+app.kernel.do_shutdown(True)
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -19,8 +28,15 @@ df = pd.read_csv('/workspaces/DSA506Project/Sample - Superstore.csv', encoding='
 # Data Cleaning
 df.drop_duplicates(inplace=True)
 df.dropna(inplace=True)
+#Transform data types
 df['Order Date'] = pd.to_datetime(df['Order Date'])
 df['Ship Date'] = pd.to_datetime(df['Ship Date'])
+df['Lead time'] = (df['Ship Date']-df['Order Date']).dt.days
+df['year_month'] = df['Order Date'].dt.strftime('%Y-%m')
+#Add derived columns
+df['Year'] = df['Order Date'].dt.year
+df['Month'] = df['Order Date'].dt.month
+df['Day'] = df['Order Date'].dt.day
 
 # Exploratory Data Analysis (EDA)
 #Total Sales and Profits across regions
@@ -218,6 +234,87 @@ plt.ylabel("Accuracy Score")
 plt.title("Comparison of Model Performance")
 plt.ylim(-1, 1) 
 plt.savefig("plot8.jpg", dpi=300)
+plt.show()
+
+#Monthly sales by category
+monthly_category_sales = df.groupby(['Month', 'Category'])['Sales'].sum().reset_index()
+plt.figure(figsize=(12, 6))
+for category in monthly_category_sales['Category'].unique():
+    data = monthly_category_sales[monthly_category_sales['Category'] == category]
+    plt.plot(data['Month'], data['Sales'], label=category)
+plt.title('Monthly Sales Trends by Category')
+plt.xlabel('Month')
+plt.ylabel('Total Sales')
+plt.xticks(rotation=45)
+plt.legend()
+plt.savefig('plot7.png')
+plt.show()
+sns.scatterplot(x='Sales', y='Profit', hue='Category', data=df)
+plt.title('Sales vs. Profit by Category')
+plt.savefig('plot8.png')
+plt.show()
+
+# Group data by category and calculate average sales, profit, and discount
+category_metrics = df.groupby('Category').agg({'Sales': 'mean', 'Profit': 'mean', 'Discount': 'mean'}).reset_index()
+category_metrics
+
+
+#Trends & Patterns over time
+#Group by month & calculate total sales & profit
+
+df['YearMonth'] = df['Order Date'].dt.strftime('%Y-%m')
+monthly_data = df.groupby('YearMonth').agg({'Sales': 'sum', 'Profit': 'sum'}).reset_index()
+plt.figure(figsize=(12, 6))
+plt.plot(monthly_data['YearMonth'], monthly_data['Sales'], marker='o')
+plt.title('Monthly Sales Trends')
+plt.xlabel('Month')
+plt.ylabel('Total Sales')
+plt.xticks(rotation=45)
+plt.grid()
+plt.savefig('plot10.png')
+plt.show()
+
+plt.figure(figsize=(12, 6))
+plt.plot(monthly_data['YearMonth'], monthly_data['Profit'], marker='o', color='orange')
+plt.title('Monthly Profit Trends')
+plt.xlabel('Month')
+plt.ylabel('Total Profit')
+plt.xticks(rotation=45)
+plt.grid()
+plt.savefig('plot11.png')
+plt.show()
+
+# Perform seasonal decomposition
+from statsmodels.tsa.seasonal import seasonal_decompose
+# Set the 'YearMonth' column as the index
+monthly_data.set_index('YearMonth', inplace=True)
+
+decomposition = seasonal_decompose(monthly_data['Sales'], model='additive', period=12)
+decomposition.plot()
+plt.savefig('plot12.png')
+plt.show()
+
+#Forecasting future sales
+train = monthly_data.iloc[:24]  # First 24 months for training
+test = monthly_data.iloc[24:]   # Remaining months for testing
+from statsmodels.tsa.arima.model import ARIMA
+# Fit the ARIMA model
+model = ARIMA(train['Sales'], order=(5, 1, 0))  # Example order (p, d, q)
+model_fit = model.fit()
+
+# Forecast future sales
+forecast = model_fit.forecast(steps=len(test))
+plt.figure(figsize=(12, 6))
+plt.plot(train.index, train['Sales'], label='Training Data')
+plt.plot(test.index, test['Sales'], label='Actual Sales')
+plt.plot(test.index, forecast, label='Forecasted Sales', color='red')
+plt.title('Sales Forecast vs. Actual')
+plt.xlabel('Month')
+plt.ylabel('Total Sales')
+plt.xticks(rotation=45)
+plt.legend()
+plt.grid()
+plt.savefig('plot13.png')
 plt.show()
 
 
