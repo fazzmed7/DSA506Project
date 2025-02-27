@@ -10,9 +10,11 @@ from sklearn.linear_model import LinearRegression
 from sklearn.cluster import KMeans
 from sklearn.metrics import mean_squared_error, r2_score
 from statsmodels.tsa.statespace.sarimax import SARIMAX
+from sklearn.metrics import silhouette_score, mean_absolute_percentage_error
+
 
 # Load Dataset
-df = pd.read_csv('/content/Sample - Superstore.csv', encoding='windows-1254')
+df = pd.read_csv('/workspaces/DSA506Project/Sample - Superstore.csv', encoding='windows-1254')
 
 # Data Cleaning
 df.drop_duplicates(inplace=True)
@@ -173,22 +175,37 @@ X = df[['Sales']]
 y = df['Profit']
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Linear Regression
+df.set_index('Order Date', inplace=True)
+y_test = df['Profit'].iloc[-len(y_test):]  
+
+ # Linear Regression
 lr = LinearRegression()
 lr.fit(X_train, y_train)
 y_pred_lr = lr.predict(X_test)
 lr_accuracy = r2_score(y_test, y_pred_lr)
 
 # Time Series SARIMA Model
+# Time Series SARIMA Model
 ts_model = SARIMAX(df['Profit'], order=(1,1,1), seasonal_order=(1,1,1,12))
 ts_result = ts_model.fit()
 y_pred_sarima = ts_result.predict(start=len(y_train), end=len(y_train) + len(y_test) - 1)
-ts_accuracy = r2_score(y_test, y_pred_sarima)
+
+# Ensure alignment between predictions and actual values
+y_pred_sarima = y_pred_sarima[:len(y_test)] 
+ts_mape = mean_absolute_percentage_error(y_test, y_pred_sarima)
+ts_accuracy = 1 - ts_mape 
 
 # KMeans Clustering
 kmeans = KMeans(n_clusters=3, random_state=42)
 kmeans.fit(X)
-kmeans_accuracy = 1 - kmeans.inertia_ / np.var(X)
+if len(set(kmeans.labels_)) > 1:  # Ensure multiple clusters exist
+    kmeans_accuracy = silhouette_score(X, kmeans.labels_)
+else:
+    kmeans_accuracy = 0
+
+print("Linear Regression Accuracy:", lr_accuracy)
+print("SARIMA (Time Series) Accuracy:", ts_accuracy)
+print("KMeans Clustering Accuracy:", kmeans_accuracy)
 
 # Model Performance Summary Graph
 models = ['Linear Regression', 'SARIMA (Time Series)', 'KMeans Clustering']
@@ -199,7 +216,7 @@ plt.bar(models, accuracies, color=['blue', 'green', 'red'])
 plt.xlabel("Model")
 plt.ylabel("Accuracy Score")
 plt.title("Comparison of Model Performance")
-plt.ylim(0, 1)
+plt.ylim(-1, 1) 
 plt.savefig("plot8.jpg", dpi=300)
 plt.show()
 
