@@ -127,3 +127,33 @@ plt.ylabel('Total Profit')
 plt.xticks(rotation=45)
 plt.grid()
 plt.show()
+from statsmodels.tsa.seasonal import seasonal_decompose
+# Set the 'YearMonth' column as the index
+monthly_data.set_index('YearMonth', inplace=True)
+
+# Perform seasonal decomposition
+decomposition = seasonal_decompose(monthly_data['Sales'], model='additive', period=12)
+decomposition.plot()
+plt.show()
+#Forecasting future sales
+train = monthly_data.iloc[:24]  # First 24 months for training
+test = monthly_data.iloc[24:]   # Remaining months for testing
+from statsmodels.tsa.arima.model import ARIMA
+# Fit the ARIMA model
+model = ARIMA(train['Sales'], order=(5, 1, 0))  # Example order (p, d, q)
+model_fit = model.fit()
+
+# Forecast future sales
+forecast = model_fit.forecast(steps=len(test))
+plt.figure(figsize=(12, 6))
+plt.plot(train.index, train['Sales'], label='Training Data')
+plt.plot(test.index, test['Sales'], label='Actual Sales')
+plt.plot(test.index, forecast, label='Forecasted Sales', color='red')
+plt.title('Sales Forecast vs. Actual')
+plt.xlabel('Month')
+plt.ylabel('Total Sales')
+plt.xticks(rotation=45)
+plt.legend()
+plt.grid()
+plt.show()
+
