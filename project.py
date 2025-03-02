@@ -28,6 +28,12 @@ df['Month'] = df['Order Date'].dt.month
 df['Day'] = df['Order Date'].dt.day
 
 # Exploratory Data Analysis (EDA)
+# Selecting relevant numerical columns for visualization
+numeric_cols = ["Sales", "Profit", "Discount", "Quantity"]
+
+# Create the pair plot
+sns.pairplot(df[numeric_cols])
+plt.show()
 #Total Sales and Profits across regions
 #Group data by region and calculate total sales 
 regional_sales=df.groupby('Region')['Sales'].sum().reset_index()
